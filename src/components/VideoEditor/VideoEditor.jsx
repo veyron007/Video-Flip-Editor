@@ -78,7 +78,6 @@ const VideoEditor = ({ setOpenModal }) => {
 
   const videoRef = useRef(null);
   const videoContainerRef = useRef(null);
-  const dragDebounceTimerRef = useRef(null);
 
   useEffect(() => {
     if (!state.isCropperVisible) {
@@ -103,32 +102,42 @@ const VideoEditor = ({ setOpenModal }) => {
     return { width: cropperWidth, height: cropperHeight, x: x, y: y };
   }, [state.aspectRatioKey, state.cropperX, containerRect]);
 
-  const recordDataPoint = (type) => {
-    if (!containerRect || cropperDimensions.width === 0) {
+  const recordDataPoint = (type, overrideDimensions = null) => {
+    if (!containerRect) {
       return;
     }
+
+    // Use provided dimensions (for drag events) or current cropperDimensions
+    const dimensionsToRecord = overrideDimensions || cropperDimensions;
+
+    if (dimensionsToRecord.width === 0) {
+      return;
+    }
+
     const containerWidth = containerRect.width;
     const containerHeight = containerRect.height;
 
-    const percent_x = containerWidth > 0 ? cropperDimensions.x / containerWidth : 0;
-    const percent_y = containerHeight > 0 ? cropperDimensions.y / containerHeight : 0;
-    const percent_width = containerWidth > 0 ? cropperDimensions.width / containerWidth : 0;
-    const percent_height = containerHeight > 0 ? cropperDimensions.height / containerHeight : 0;
+    // Calculate normalized percentages from the dimensions being recorded
+    const percent_x = containerWidth > 0 ? dimensionsToRecord.x / containerWidth : 0;
+    const percent_y = containerHeight > 0 ? dimensionsToRecord.y / containerHeight : 0;
+    const percent_width = containerWidth > 0 ? dimensionsToRecord.width / containerWidth : 0;
+    const percent_height = containerHeight > 0 ? dimensionsToRecord.height / containerHeight : 0;
 
     const currentCoords = [percent_x, percent_y, percent_width, percent_height];
     const newVolume = state.volume;
     const newPlaybackRate = state.playbackRate;
 
-    // const lastEvent = sessionLog[sessionLog.length - 1];
-    // if (lastEvent) {
-    //   const coordsAreEqual = JSON.stringify(currentCoords) === JSON.stringify(lastEvent.coordinates);
-    //   const volumeIsEqual = newVolume === lastEvent.volume;
-    //   const rateIsEqual = newPlaybackRate === lastEvent.playbackRate;
+    // Deduplication: Skip duplicate cropper moves to avoid redundant identical frames
+    const lastEvent = sessionLog[sessionLog.length - 1];
+    if (lastEvent) {
+      const coordsAreEqual = JSON.stringify(currentCoords) === JSON.stringify(lastEvent.coordinates);
+      const volumeIsEqual = newVolume === lastEvent.volume;
+      const rateIsEqual = newPlaybackRate === lastEvent.playbackRate;
 
-    //   if ((type === 'cropperMove') && coordsAreEqual && volumeIsEqual && rateIsEqual) {
-    //     return;
-    //   }
-    // }
+      if ((type === 'cropperMove') && coordsAreEqual && volumeIsEqual && rateIsEqual) {
+        return; // Skip duplicate events for cropper moves only
+      }
+    }
 
     const dataPoint = {
       timeStamp: videoRef.current.currentTime,
@@ -237,26 +246,24 @@ const VideoEditor = ({ setOpenModal }) => {
   const handleCropperDrag = (newXPercentage) => {
     dispatch({ type: 'SET_CROPPER_X', payload: newXPercentage });
 
-    // Debounce recording data points during drag to avoid excessive logging.
-    // Clear any existing timer and set a new one.
-    if (dragDebounceTimerRef.current) {
-      clearTimeout(dragDebounceTimerRef.current);
-    }
+    if (containerRect) {
+      const containerHeight = containerRect.height;
+      const containerWidth = containerRect.width;
+      const aspectRatio = ASPECT_RATIOS[state.aspectRatioKey];
+      const cropperHeight = containerHeight;
+      const cropperWidth = cropperHeight * aspectRatio;
+      const y = 0;
+      const maxX = containerWidth - cropperWidth;
+      const boundedX = newXPercentage * (containerWidth - cropperWidth);
+      const x = Math.max(0, Math.min(boundedX, maxX));
 
-    dragDebounceTimerRef.current = setTimeout(() => {
-      recordDataPoint('cropperMove');
-      dragDebounceTimerRef.current = null;
-    }, 100); // Record every 100ms during drag
+      const dimensionsBeingSet = { width: cropperWidth, height: cropperHeight, x: x, y: y };
+      recordDataPoint('cropperMove', dimensionsBeingSet);
+    }
   };
 
   const handleCropperDragEnd = () => {
-    // Cancel any pending debounced call and record final state immediately
-    if (dragDebounceTimerRef.current) {
-      clearTimeout(dragDebounceTimerRef.current);
-      dragDebounceTimerRef.current = null;
-    }
-    // Record the final state after drag ends
-    recordDataPoint('cropperMove');
+    // Drag end: no recording needed.
   };
 
   const renderEditor = () => (

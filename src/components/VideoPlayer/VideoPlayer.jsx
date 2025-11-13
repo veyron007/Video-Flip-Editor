@@ -26,7 +26,6 @@ const VideoPlayer = ({
     videoRef.current.playbackRate = state.playbackRate;
   }, [state.playbackRate]);
 
-  // Report container size back to parent
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new ResizeObserver((entries) => {
@@ -39,7 +38,6 @@ const VideoPlayer = ({
     return () => observer.disconnect();
   }, [containerRef, onContainerRectChange]);
 
-  // The rAF loop for smooth time updates
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;

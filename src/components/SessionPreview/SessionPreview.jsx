@@ -1,9 +1,7 @@
-// src/components/SessionPreview/SessionPreview.jsx
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import styles from './SessionPreview.module.css';
 import PlayerControls from '../PlayerControls/PlayerControls';
 
-// Helper function
 const findCurrentEntry = (sessionLog, time) => {
   const entry = sessionLog.findLast((e) => e.timeStamp <= time);
   return entry || sessionLog[0];
@@ -21,9 +19,7 @@ const SessionPreview = ({ sessionLog, videoSrc }) => {
     findCurrentEntry(sessionLog, 0)
   );
 
-  // --- THIS IS THE FIX ---
   const [isSeeking, setIsSeeking] = useState(false);
-  // --- END OF FIX ---
 
   const drawFrame = useCallback((ctx, video, entry) => {
     const [percent_x, percent_y, percent_width, percent_height] =
@@ -74,7 +70,6 @@ const SessionPreview = ({ sessionLog, videoSrc }) => {
     );
   }, []);
 
-  // Real-time Playback Loop
   useEffect(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -84,12 +79,10 @@ const SessionPreview = ({ sessionLog, videoSrc }) => {
     canvas.width = 500;
 
     const loop = () => {
-      // --- THIS IS THE FIX ---
       if (!videoRef.current || videoRef.current.paused || isSeeking) {
         cancelAnimationFrame(animFrameRef.current);
         return;
       }
-      // --- END OF FIX ---
       
       const time = videoRef.current.currentTime;
       const entry = findCurrentEntry(sessionLog, time);
@@ -105,9 +98,8 @@ const SessionPreview = ({ sessionLog, videoSrc }) => {
       cancelAnimationFrame(animFrameRef.current);
     }
     return () => cancelAnimationFrame(animFrameRef.current);
-  }, [isPlaying, drawFrame, sessionLog, isSeeking]); // <-- Add isSeeking
+  }, [isPlaying, drawFrame, sessionLog, isSeeking]); 
 
-  // Static Frame Drawing
   useEffect(() => {
     if (!isPlaying) {
       setTimeout(() => {
@@ -120,7 +112,6 @@ const SessionPreview = ({ sessionLog, videoSrc }) => {
     }
   }, [activeEntry, isPlaying, drawFrame]);
 
-  // Video Event Handlers (for playback)
   const handleLoadedMetadata = () => {
     setDuration(videoRef.current.duration);
     setTimeout(() => {
@@ -133,9 +124,7 @@ const SessionPreview = ({ sessionLog, videoSrc }) => {
   };
 
   const handleTimeUpdate = () => {
-    // --- THIS IS THE FIX ---
     if (!videoRef.current || isPlaying || isSeeking) return; // Don't run if rAF loop is running or user is seeking
-    // --- END OF FIX ---
     
     const time = videoRef.current.currentTime;
     setCurrentTime(time);
@@ -148,13 +137,11 @@ const SessionPreview = ({ sessionLog, videoSrc }) => {
     }
   };
 
-  // Playback Control Handlers
   const handlePlayPause = () => {
     if (isPlaying) videoRef.current.pause();
     else videoRef.current.play();
   };
 
-  // --- THIS IS THE FIX ---
   const handleSeekStart = () => {
     setIsSeeking(true);
   };
@@ -170,7 +157,6 @@ const SessionPreview = ({ sessionLog, videoSrc }) => {
     setIsSeeking(false);
     setActiveEntry(findCurrentEntry(sessionLog, newTime));
   };
-  // --- END OF FIX ---
   
   const handleVolumeChange = (vol) => {
     videoRef.current.volume = vol;
