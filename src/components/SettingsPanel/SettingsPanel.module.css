@@ -1,0 +1,36 @@
+.panelWrapper {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px; 
+}
+
+.selectWrapper {
+  background: #37393f;
+  border: 1px solid #45474e;
+  border-radius: 5px;
+  padding: 7px 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.selectLabel {
+  font-size: 12px;
+  font-weight: 400;
+  color: #ffffff;
+  white-space: nowrap;
+  pointer-events: none; 
+}
+
+.select {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 12px;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}

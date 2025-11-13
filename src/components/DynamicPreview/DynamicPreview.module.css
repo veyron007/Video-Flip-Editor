@@ -1,0 +1,44 @@
+.previewContainer {
+  width: 100%;
+  height: 450px;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.canvasElement {
+  width: 100%;
+  height: auto; 
+  display: block;
+}
+
+.previewNotAvailable {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  text-align: center;
+}
+
+.previewText {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 10px 0 0 0;
+}
+
+.previewSubText {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 4px 0 0 0;
+  line-height: 1.3;
+}

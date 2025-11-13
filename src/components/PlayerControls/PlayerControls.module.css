@@ -1,0 +1,101 @@
+.controlsWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.bottomRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 30px;
+}
+
+.volumeWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.playButton {
+  width: 20px;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.timeDisplay {
+  font-size: 12px;
+  font-weight: 500;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  height: 12px;
+  width: 100%;
+  background: transparent; 
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 6px;
+  background: linear-gradient(
+    to right,
+    #ffffff var(--progress-percent), /* The white "covered" part */
+    rgba(255, 255, 255, 0.23) var(--progress-percent) /* The gray "uncovered" part */
+  );
+}
+
+input[type='range']::-moz-range-track {
+  height: 4px;
+  border-radius: 6px;
+  background: linear-gradient(
+    to right,
+    #ffffff var(--progress-percent),
+    rgba(255, 255, 255, 0.23) var(--progress-percent)
+  );
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -4px; /* Center thumb */
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.13);
+}
+input[type='range']::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.13);
+  border: none;
+}
+
+.seekBar {
+  flex-grow: 1;
+}
+
+.volumeBar {
+  width: 45px;
+}
