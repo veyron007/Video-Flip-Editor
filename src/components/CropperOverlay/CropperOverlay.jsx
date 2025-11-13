@@ -29,28 +29,20 @@ const CropperOverlay = ({
     const handleMouseMove = (moveEvent) => {
       moveEvent.preventDefault();
 
-      // ***** BUG WAS HERE *****
-      // The line 'if (!isDragging) return;' was here.
-      // We remove it because the listener is only attached
-      // while dragging, making the check redundant and buggy.
-      // ************************
+     
 
       const deltaX = moveEvent.clientX - initialMouseX;
       let newPixelX = initialCropperX + deltaX;
 
-      // === Clamping ===
       const cropperWidth = dimensions.width;
       const minX = 0;
       const maxX = containerWidth - cropperWidth;
 
-      // Clamp the pixel value
       newPixelX = Math.max(minX, Math.min(newPixelX, maxX));
 
-      // Convert pixel X back to a percentage (0 to 1)
       const maxDragRange = containerWidth - cropperWidth;
       let newXPercentage = newPixelX / maxDragRange;
 
-      // Handle divide by zero if cropperWidth >= containerWidth
       if (maxDragRange <= 0) {
         newXPercentage = 0;
       }
@@ -60,12 +52,11 @@ const CropperOverlay = ({
 
     const handleMouseUp = () => {
       setIsDragging(false);
-      onDragEnd(); // Notify parent that dragging stopped
+      onDragEnd(); 
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
 
-    // Listen on the *document* to catch mouse moves outside the container
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   };
@@ -76,7 +67,6 @@ const CropperOverlay = ({
       style={cropperStyle}
       onMouseDown={handleMouseDown}
     >
-      {/* Dashed grid lines from Figma */}
       <div className={styles.gridLineV} style={{ left: '33.33%' }}></div>
       <div className={styles.gridLineV} style={{ left: '66.66%' }}></div>
       <div className={styles.gridLineH} style={{ top: '33.33%' }}></div>
