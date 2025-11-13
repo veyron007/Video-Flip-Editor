@@ -44,7 +44,7 @@ function editorReducer(state, action) {
     case 'SET_PLAYBACK_RATE':
       return { ...state, playbackRate: action.payload };
     case 'TOGGLE_CROPPER': {
-     
+
       const newVisible = !state.isCropperVisible;
       return {
         ...state,
@@ -78,6 +78,7 @@ const VideoEditor = ({ setOpenModal }) => {
 
   const videoRef = useRef(null);
   const videoContainerRef = useRef(null);
+  const dragDebounceTimerRef = useRef(null);
 
   useEffect(() => {
     if (!state.isCropperVisible) {
@@ -118,16 +119,16 @@ const VideoEditor = ({ setOpenModal }) => {
     const newVolume = state.volume;
     const newPlaybackRate = state.playbackRate;
 
-    const lastEvent = sessionLog[sessionLog.length - 1];
-    if (lastEvent) {
-      const coordsAreEqual = JSON.stringify(currentCoords) === JSON.stringify(lastEvent.coordinates);
-      const volumeIsEqual = newVolume === lastEvent.volume;
-      const rateIsEqual = newPlaybackRate === lastEvent.playbackRate;
+    // const lastEvent = sessionLog[sessionLog.length - 1];
+    // if (lastEvent) {
+    //   const coordsAreEqual = JSON.stringify(currentCoords) === JSON.stringify(lastEvent.coordinates);
+    //   const volumeIsEqual = newVolume === lastEvent.volume;
+    //   const rateIsEqual = newPlaybackRate === lastEvent.playbackRate;
 
-      if ((type === 'cropperMove') && coordsAreEqual && volumeIsEqual && rateIsEqual) {
-        return;
-      }
-    }
+    //   if ((type === 'cropperMove') && coordsAreEqual && volumeIsEqual && rateIsEqual) {
+    //     return;
+    //   }
+    // }
 
     const dataPoint = {
       timeStamp: videoRef.current.currentTime,
@@ -235,9 +236,26 @@ const VideoEditor = ({ setOpenModal }) => {
 
   const handleCropperDrag = (newXPercentage) => {
     dispatch({ type: 'SET_CROPPER_X', payload: newXPercentage });
+
+    // Debounce recording data points during drag to avoid excessive logging.
+    // Clear any existing timer and set a new one.
+    if (dragDebounceTimerRef.current) {
+      clearTimeout(dragDebounceTimerRef.current);
+    }
+
+    dragDebounceTimerRef.current = setTimeout(() => {
+      recordDataPoint('cropperMove');
+      dragDebounceTimerRef.current = null;
+    }, 100); // Record every 100ms during drag
   };
 
   const handleCropperDragEnd = () => {
+    // Cancel any pending debounced call and record final state immediately
+    if (dragDebounceTimerRef.current) {
+      clearTimeout(dragDebounceTimerRef.current);
+      dragDebounceTimerRef.current = null;
+    }
+    // Record the final state after drag ends
     recordDataPoint('cropperMove');
   };
 
@@ -250,7 +268,7 @@ const VideoEditor = ({ setOpenModal }) => {
               <VideoPlayer
                 videoRef={videoRef}
                 containerRef={videoContainerRef}
-                src = {videoUrl}
+                src={videoUrl}
                 state={state}
                 dispatch={dispatch}
                 cropperDimensions={cropperDimensions}
@@ -316,12 +334,12 @@ const VideoEditor = ({ setOpenModal }) => {
           </button>
           <button
             className={
-              state.isCropperVisible && sessionLog.length > 1
+              state.isCropperVisible
                 ? styles.ctaButton
                 : styles.ctaButtonSecondary
             }
             onClick={handleGenerateJSON}
-            disabled={!state.isCropperVisible || sessionLog.length <= 1}
+            disabled={!state.isCropperVisible || sessionLog.length < 1}
           >
             Generate Preview
           </button>
